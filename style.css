@@ -69,3 +69,15 @@ img {
   display: block;
   margin: 0.5rem 0;
 }
+
+
+/* Force page break before bank details on print/PDF */
+.bank-details {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Add padding to prevent awkward page splits */
+section.bank-details input {
+  margin-bottom: 8px;
+}
