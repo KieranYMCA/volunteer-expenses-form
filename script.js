@@ -71,7 +71,7 @@ receiptUpload.addEventListener('change', () => {
   });
 });
 
-// PDF download with each image on a new page
+// PDF download with receipts each on a new page
 document.getElementById('download-pdf').onclick = async () => {
   const container = document.querySelector('.container').cloneNode(true);
   const canvasCopy = canvas.cloneNode(true);
@@ -79,7 +79,7 @@ document.getElementById('download-pdf').onclick = async () => {
   container.querySelector('#signatureCanvas')?.replaceWith(canvasCopy);
   container.querySelector('#receiptPreview')?.remove();
 
-  const pdfOptions = {
+  const opt = {
     margin: 10,
     filename: `YMCA_Volunteer_Expenses_${form.name.value || 'claim'}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
@@ -88,24 +88,21 @@ document.getElementById('download-pdf').onclick = async () => {
     pagebreak: { mode: ['css', 'legacy'] }
   };
 
-  const worker = html2pdf().set(pdfOptions).from(container);
+  const worker = html2pdf().set(opt).from(container);
+  const pdf = await worker.toPdf().get('pdf');
 
-  const pdf = await worker.toPdf();
-
-  // Add each receipt image as a new page
   for (let i = 0; i < uploadedImages.length; i++) {
-    pdf.internal.pageSize.height = pdf.internal.pageSize.getHeight();
     pdf.addPage();
     const imgProps = pdf.getImageProperties(uploadedImages[i]);
-    const ratio = imgProps.width / imgProps.height;
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+
     let imgWidth = pageWidth - 20;
-    let imgHeight = imgWidth / ratio;
+    let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
     if (imgHeight > pageHeight - 20) {
       imgHeight = pageHeight - 20;
-      imgWidth = imgHeight * ratio;
+      imgWidth = (imgProps.width * imgHeight) / imgProps.height;
     }
 
     const x = (pageWidth - imgWidth) / 2;
@@ -114,5 +111,5 @@ document.getElementById('download-pdf').onclick = async () => {
     pdf.addImage(uploadedImages[i], 'JPEG', x, y, imgWidth, imgHeight);
   }
 
-  pdf.save(pdfOptions.filename);
+  pdf.save(opt.filename);
 };
