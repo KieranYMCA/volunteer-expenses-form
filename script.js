@@ -71,31 +71,48 @@ receiptUpload.addEventListener('change', () => {
   });
 });
 
-// PDF download
-document.getElementById('download-pdf').onclick = () => {
+// PDF download with each image on a new page
+document.getElementById('download-pdf').onclick = async () => {
   const container = document.querySelector('.container').cloneNode(true);
   const canvasCopy = canvas.cloneNode(true);
   canvasCopy.getContext('2d').drawImage(canvas, 0, 0);
-
   container.querySelector('#signatureCanvas')?.replaceWith(canvasCopy);
+  container.querySelector('#receiptPreview')?.remove();
 
-  if (uploadedImages.length) {
-    const previewDiv = container.querySelector('#receiptPreview');
-    previewDiv.innerHTML = '';
-    uploadedImages.forEach(src => {
-      const img = document.createElement('img');
-      img.src = src;
-      img.style.maxWidth = "300px";
-      img.style.margin = "10px 0";
-      previewDiv.appendChild(img);
-    });
-  }
-
-  html2pdf().set({
+  const pdfOptions = {
     margin: 10,
     filename: `YMCA_Volunteer_Expenses_${form.name.value || 'claim'}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, scrollY: 0 },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-  }).from(container).save();
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  const worker = html2pdf().set(pdfOptions).from(container);
+
+  const pdf = await worker.toPdf();
+
+  // Add each receipt image as a new page
+  for (let i = 0; i < uploadedImages.length; i++) {
+    pdf.internal.pageSize.height = pdf.internal.pageSize.getHeight();
+    pdf.addPage();
+    const imgProps = pdf.getImageProperties(uploadedImages[i]);
+    const ratio = imgProps.width / imgProps.height;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let imgWidth = pageWidth - 20;
+    let imgHeight = imgWidth / ratio;
+
+    if (imgHeight > pageHeight - 20) {
+      imgHeight = pageHeight - 20;
+      imgWidth = imgHeight * ratio;
+    }
+
+    const x = (pageWidth - imgWidth) / 2;
+    const y = (pageHeight - imgHeight) / 2;
+
+    pdf.addImage(uploadedImages[i], 'JPEG', x, y, imgWidth, imgHeight);
+  }
+
+  pdf.save(pdfOptions.filename);
 };
