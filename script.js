@@ -3,7 +3,8 @@ const form = document.getElementById('volunteer-form');
 const milesInput = document.getElementById('miles');
 const mileageAmount = document.getElementById('mileage-amount');
 const totalAmount = document.getElementById('totalAmount');
-const receiptUpload = document.getElementById('receiptUpload');
+const receiptContainer = document.getElementById('uploadContainer');
+const addReceiptInput = document.getElementById('addReceiptInput');
 const receiptPreview = document.getElementById('receiptPreview');
 let uploadedImages = [];
 
@@ -34,6 +35,16 @@ let drawing = false;
 
 canvas.addEventListener('mousedown', () => (drawing = true));
 canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+
+addReceiptInput.addEventListener('click', () => {
+  if (document.querySelectorAll('.receipt-input').length >= 25) return;
+  const newInput = document.createElement('input');
+  newInput.type = 'file';
+  newInput.name = 'receiptUpload';
+  newInput.accept = 'image/*';
+  newInput.className = 'receipt-input';
+  receiptContainer.appendChild(newInput);
+});
 canvas.addEventListener('mousemove', draw);
 
 function draw(e) {
@@ -53,7 +64,11 @@ document.getElementById('clear-signature').onclick = () => {
 };
 
 // Handle receipt uploads
-receiptUpload.addEventListener('change', () => {
+form.addEventListener('change', () => {
+  uploadedImages = [];
+  receiptPreview.innerHTML = "";
+  const files = [...document.querySelectorAll('.receipt-input')].flatMap(input => [...input.files]);
+  files.slice(0, 25).forEach(file => {
   uploadedImages = [];
   receiptPreview.innerHTML = "";
   [...receiptUpload.files].forEach(file => {
@@ -69,6 +84,26 @@ receiptUpload.addEventListener('change', () => {
     };
     reader.readAsDataURL(file);
   });
+
+addReceiptInput.addEventListener('click', () => {
+  if (document.querySelectorAll('.receipt-input').length >= 25) return;
+  const newInput = document.createElement('input');
+  newInput.type = 'file';
+  newInput.name = 'receiptUpload';
+  newInput.accept = 'image/*';
+  newInput.className = 'receipt-input';
+  receiptContainer.appendChild(newInput);
+});
+});
+
+addReceiptInput.addEventListener('click', () => {
+  if (document.querySelectorAll('.receipt-input').length >= 25) return;
+  const newInput = document.createElement('input');
+  newInput.type = 'file';
+  newInput.name = 'receiptUpload';
+  newInput.accept = 'image/*';
+  newInput.className = 'receipt-input';
+  receiptContainer.appendChild(newInput);
 });
 
 // PDF download with receipts each on a new page

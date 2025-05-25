@@ -57,7 +57,10 @@
 
       <section>
         <h2>Upload Receipts</h2>
-        <input type="file" id="receiptUpload" accept="image/*" multiple />
+        <div id="uploadContainer">
+      <input type="file" name="receiptUpload" class="receipt-input" accept="image/*" />
+    </div>
+    <button type="button" id="addReceiptInput">Add Another Receipt</button>
         <div id="receiptPreview"></div>
       </section>
 
