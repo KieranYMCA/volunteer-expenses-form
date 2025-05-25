@@ -13,18 +13,14 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
-.logo {
-  max-width: 150px;
-  display: block;
-  margin-bottom: 1rem;
-}
 header h1 {
   color: #ff0044;
   font-size: 1.5rem;
 }
 input[type="text"],
 input[type="date"],
-input[type="number"] {
+input[type="number"],
+input[type="file"] {
   padding: 10px;
   margin: 5px 0;
   width: 100%;
@@ -68,4 +64,8 @@ canvas {
 }
 .submit-btn {
   margin-right: 10px;
+}
+img {
+  display: block;
+  margin: 0.5rem 0;
 }

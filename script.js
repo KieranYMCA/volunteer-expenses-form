@@ -3,6 +3,9 @@ const form = document.getElementById('volunteer-form');
 const milesInput = document.getElementById('miles');
 const mileageAmount = document.getElementById('mileage-amount');
 const totalAmount = document.getElementById('totalAmount');
+const receiptUpload = document.getElementById('receiptUpload');
+const receiptPreview = document.getElementById('receiptPreview');
+let uploadedImages = [];
 
 const MILEAGE_RATE = 0.25;
 
@@ -11,12 +14,12 @@ function updateTotals() {
   const mileage = miles * MILEAGE_RATE;
   mileageAmount.value = mileage.toFixed(2);
 
-  const bus = parseFloat(form.busFare.value) || 0;
-  const rail = parseFloat(form.railFare.value) || 0;
-  const air = parseFloat(form.airFare.value) || 0;
-  const sub = parseFloat(form.subsistence.value) || 0;
-  const accom = parseFloat(form.accommodation.value) || 0;
-  const other = parseFloat(form.other.value) || 0;
+  const bus = parseFloat(form.busFare?.value) || 0;
+  const rail = parseFloat(form.railFare?.value) || 0;
+  const air = parseFloat(form.airFare?.value) || 0;
+  const sub = parseFloat(form.subsistence?.value) || 0;
+  const accom = parseFloat(form.accommodation?.value) || 0;
+  const other = parseFloat(form.other?.value) || 0;
 
   const total = mileage + bus + rail + air + sub + accom + other;
   totalAmount.value = total.toFixed(2);
@@ -49,16 +52,50 @@ document.getElementById('clear-signature').onclick = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
+// Handle receipt uploads
+receiptUpload.addEventListener('change', () => {
+  uploadedImages = [];
+  receiptPreview.innerHTML = "";
+  [...receiptUpload.files].forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = document.createElement('img');
+      img.src = reader.result;
+      img.style.maxWidth = "200px";
+      img.style.margin = "5px";
+      receiptPreview.appendChild(img);
+      uploadedImages.push(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
 // PDF download
 document.getElementById('download-pdf').onclick = () => {
-  html2pdf()
-    .set({
-      margin: 10,
-      filename: `YMCA_Volunteer_Expenses_${form.name.value || 'claim'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, scrollY: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    })
-    .from(document.querySelector('.container'))
-    .save();
+  const container = document.querySelector('.container').cloneNode(true);
+  const canvasCopy = canvas.cloneNode(true);
+  canvasCopy.getContext('2d').drawImage(canvas, 0, 0);
+
+  container.querySelector('#signatureCanvas')?.replaceWith(canvasCopy);
+
+  if (uploadedImages.length) {
+    const previewDiv = container.querySelector('#receiptPreview');
+    previewDiv.innerHTML = '';
+    uploadedImages.forEach(src => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.style.maxWidth = "300px";
+      img.style.margin = "10px 0";
+      previewDiv.appendChild(img);
+    });
+  }
+
+  html2pdf().set({
+    margin: 10,
+    filename: `YMCA_Volunteer_Expenses_${form.name.value || 'claim'}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  }).from(container).save();
 };
