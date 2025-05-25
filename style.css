@@ -69,15 +69,17 @@ img {
   display: block;
   margin: 0.5rem 0;
 }
-
-
-/* Force page break before bank details on print/PDF */
+.receipt-block {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  background: #fafafa;
+}
+.receipt-block input[type="file"] {
+  margin-bottom: 5px;
+}
 .bank-details {
   page-break-inside: avoid;
   break-inside: avoid;
-}
-
-/* Add padding to prevent awkward page splits */
-section.bank-details input {
-  margin-bottom: 8px;
 }
