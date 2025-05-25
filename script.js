@@ -1,150 +1,76 @@
 
-const form = document.getElementById('volunteer-form');
-const milesInput = document.getElementById('miles');
-const mileageAmount = document.getElementById('mileage-amount');
-const totalAmount = document.getElementById('totalAmount');
-const receiptContainer = document.getElementById('uploadContainer');
-const addReceiptInput = document.getElementById('addReceiptInput');
-const receiptPreview = document.getElementById('receiptPreview');
-let uploadedImages = [];
+let imageCount = 0;
 
-const MILEAGE_RATE = 0.25;
+function addImageUpload() {
+  if (imageCount >= 25) return;
 
-function updateTotals() {
-  const miles = parseFloat(milesInput.value) || 0;
-  const mileage = miles * MILEAGE_RATE;
-  mileageAmount.value = mileage.toFixed(2);
+  const container = document.createElement("div");
+  container.className = "upload-group";
 
-  const bus = parseFloat(form.busFare?.value) || 0;
-  const rail = parseFloat(form.railFare?.value) || 0;
-  const air = parseFloat(form.airFare?.value) || 0;
-  const sub = parseFloat(form.subsistence?.value) || 0;
-  const accom = parseFloat(form.accommodation?.value) || 0;
-  const other = parseFloat(form.other?.value) || 0;
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.required = true;
 
-  const total = mileage + bus + rail + air + sub + accom + other;
-  totalAmount.value = total.toFixed(2);
+  const textarea = document.createElement("textarea");
+  textarea.rows = 2;
+  textarea.placeholder = "Description of receipt";
+
+  container.appendChild(document.createElement("hr"));
+  container.appendChild(input);
+  container.appendChild(textarea);
+
+  document.getElementById("uploads-container").appendChild(container);
+  imageCount++;
 }
 
-form.addEventListener('input', updateTotals);
+function generatePDF() {
+  const name = document.getElementById("name").value;
+  const account = document.getElementById("account").value;
+  const uploadGroups = document.querySelectorAll(".upload-group");
 
-// Signature pad
-const canvas = document.getElementById('signatureCanvas');
-const ctx = canvas.getContext('2d');
-let drawing = false;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y = 10;
 
-canvas.addEventListener('mousedown', () => (drawing = true));
-canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+  pdf.setFontSize(12);
+  pdf.text("YMCA Volunteer Expenses Form", 10, y);
+  y += 10;
+  pdf.text(`Full Name: ${name}`, 10, y);
+  y += 10;
+  pdf.text("Bank Account Details:", 10, y);
+  y += 10;
 
-addReceiptInput.addEventListener('click', () => {
-  if (document.querySelectorAll('.receipt-input').length >= 25) return;
-  const newInput = document.createElement('input');
-  newInput.type = 'file';
-  newInput.name = 'receiptUpload';
-  newInput.accept = 'image/*';
-  newInput.className = 'receipt-input';
-  receiptContainer.appendChild(newInput);
-});
-canvas.addEventListener('mousemove', draw);
+  const lines = pdf.splitTextToSize(account, 180);
+  pdf.text(lines, 10, y);
+  y += lines.length * 10;
 
-function draw(e) {
-  if (!drawing) return;
-  const rect = canvas.getBoundingClientRect();
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#000';
-  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-}
+  uploadGroups.forEach((group, index) => {
+    const fileInput = group.querySelector("input[type='file']");
+    const description = group.querySelector("textarea").value;
 
-document.getElementById('clear-signature').onclick = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-};
+    const file = fileInput.files[0];
+    if (!file) return;
 
-// Handle receipt uploads
-form.addEventListener('change', () => {
-  uploadedImages = [];
-  receiptPreview.innerHTML = "";
-  const files = [...document.querySelectorAll('.receipt-input')].flatMap(input => [...input.files]);
-  files.slice(0, 25).forEach(file => {
-  uploadedImages = [];
-  receiptPreview.innerHTML = "";
-  [...receiptUpload.files].forEach(file => {
-    if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      const img = document.createElement('img');
-      img.src = reader.result;
-      img.style.maxWidth = "200px";
-      img.style.margin = "5px";
-      receiptPreview.appendChild(img);
-      uploadedImages.push(reader.result);
+    reader.onload = function(e) {
+      if (index > 0 || y > 250) pdf.addPage();
+
+      const img = new Image();
+      img.onload = function() {
+        let imgWidth = 180;
+        let imgHeight = (img.height / img.width) * imgWidth;
+        pdf.addImage(img, "JPEG", 10, 20, imgWidth, imgHeight);
+        pdf.text("Description:", 10, 20 + imgHeight + 10);
+        const descLines = pdf.splitTextToSize(description, 180);
+        pdf.text(descLines, 10, 20 + imgHeight + 20);
+
+        if (index === uploadGroups.length - 1) {
+          pdf.save("YMCA_Expenses.pdf");
+        }
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
-
-addReceiptInput.addEventListener('click', () => {
-  if (document.querySelectorAll('.receipt-input').length >= 25) return;
-  const newInput = document.createElement('input');
-  newInput.type = 'file';
-  newInput.name = 'receiptUpload';
-  newInput.accept = 'image/*';
-  newInput.className = 'receipt-input';
-  receiptContainer.appendChild(newInput);
-});
-});
-
-addReceiptInput.addEventListener('click', () => {
-  if (document.querySelectorAll('.receipt-input').length >= 25) return;
-  const newInput = document.createElement('input');
-  newInput.type = 'file';
-  newInput.name = 'receiptUpload';
-  newInput.accept = 'image/*';
-  newInput.className = 'receipt-input';
-  receiptContainer.appendChild(newInput);
-});
-
-// PDF download with receipts each on a new page
-document.getElementById('download-pdf').onclick = async () => {
-  const container = document.querySelector('.container').cloneNode(true);
-  const canvasCopy = canvas.cloneNode(true);
-  canvasCopy.getContext('2d').drawImage(canvas, 0, 0);
-  container.querySelector('#signatureCanvas')?.replaceWith(canvasCopy);
-  container.querySelector('#receiptPreview')?.remove();
-
-  const opt = {
-    margin: 10,
-    filename: `YMCA_Volunteer_Expenses_${form.name.value || 'claim'}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, scrollY: 0 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
-  };
-
-  const worker = html2pdf().set(opt).from(container);
-  const pdf = await worker.toPdf().get('pdf');
-
-  for (let i = 0; i < uploadedImages.length; i++) {
-    pdf.addPage();
-    const imgProps = pdf.getImageProperties(uploadedImages[i]);
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    let imgWidth = pageWidth - 20;
-    let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-    if (imgHeight > pageHeight - 20) {
-      imgHeight = pageHeight - 20;
-      imgWidth = (imgProps.width * imgHeight) / imgProps.height;
-    }
-
-    const x = (pageWidth - imgWidth) / 2;
-    const y = (pageHeight - imgHeight) / 2;
-
-    pdf.addImage(uploadedImages[i], 'JPEG', x, y, imgWidth, imgHeight);
-  }
-
-  pdf.save(opt.filename);
-};
+}

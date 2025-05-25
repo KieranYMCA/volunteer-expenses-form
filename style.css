@@ -1,83 +1,15 @@
 
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f9f9f9;
-  margin: 0;
-  padding: 0;
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
-.container {
-  max-width: 800px;
-  margin: 2rem auto;
-  background: white;
-  padding: 2rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-header h1 {
-  color: #ff0044;
-  font-size: 1.5rem;
-}
-input[type="text"],
-input[type="date"],
-input[type="number"],
-input[type="file"] {
-  padding: 10px;
-  margin: 5px 0;
+
+input, textarea {
   width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  margin-bottom: 10px;
 }
-.entry {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-section {
-  margin-bottom: 2rem;
-}
-h2 {
-  font-size: 1.2rem;
-  color: #ff0044;
-  margin-bottom: 0.5rem;
-}
-button {
-  background-color: #ff0044;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-top: 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-weight: bold;
-}
-button:hover {
-  opacity: 0.9;
-}
-canvas {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-.submit-btn {
-  margin-right: 10px;
-}
+
 img {
-  display: block;
-  margin: 0.5rem 0;
-}
-
-
-/* Force page break before bank details on print/PDF */
-.bank-details {
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-/* Add padding to prevent awkward page splits */
-section.bank-details input {
-  margin-bottom: 8px;
+  max-width: 100%;
+  height: auto;
 }
