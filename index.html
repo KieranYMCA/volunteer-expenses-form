@@ -1,1 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YMCA Volunteer Expenses Claim Form</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="ymca-scotland-logo.png" alt="YMCA Scotland Logo" class="logo" />
+      <h1>Volunteer Expenses Claim Form</h1>
+    </header>
 
+    <form action="https://formspree.io/f/movdbkbj" method="POST" id="volunteer-form">
+      <section class="user-info">
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="text" name="address" placeholder="Address" required />
+        <input type="text" name="event" placeholder="Name of meeting/event" required />
+        <input type="date" name="eventDate" placeholder="Date of meeting/event" required />
+      </section>
+
+      <section id="expenses-section">
+        <h2>Details of Expenses Incurred</h2>
+        <div class="entry">
+          <label>Mileage (miles @ £0.25 per mile)</label>
+          <input type="number" name="miles" id="miles" step="0.1" placeholder="Miles" />
+          <input type="text" id="mileage-amount" placeholder="£" readonly />
+        </div>
+        <div class="entry">
+          <input type="number" name="busFare" placeholder="Bus Fare (£)" step="0.01" />
+          <input type="number" name="railFare" placeholder="2nd Class Rail Fare (£)" step="0.01" />
+          <input type="number" name="airFare" placeholder="Air Fare (approved only) (£)" step="0.01" />
+          <input type="number" name="subsistence" placeholder="Subsistence (£)" step="0.01" />
+          <input type="number" name="accommodation" placeholder="Accommodation (£)" step="0.01" />
+          <input type="number" name="other" placeholder="Other (£)" step="0.01" />
+        </div>
+        <div class="entry">
+          <input type="text" id="totalAmount" name="totalAmount" readonly placeholder="TOTAL (£)" />
+        </div>
+      </section>
+
+      <section id="signature">
+        <label>Signed by volunteer:</label>
+        <canvas id="signatureCanvas" width="300" height="100"></canvas>
+        <button type="button" id="clear-signature">Clear Signature</button>
+        <input type="date" id="signatureDate" name="signatureDate" />
+      </section>
+
+      <section class="bank-details">
+        <h2>Bank Details</h2>
+        <input type="text" name="bank" placeholder="Bank" required />
+        <input type="text" name="sortcode" placeholder="Sort Code" required />
+        <input type="text" name="accountNumber" placeholder="Account Number" required />
+        <input type="text" name="accountName" placeholder="Account Name" required />
+      </section>
+
+      <button type="submit" class="submit-btn">Submit Claim</button>
+      <button type="button" id="download-pdf" class="submit-btn">Download PDF</button>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
